@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI 감정 분석기</title>
+  <style>
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      background-color: #f1f5f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      resize: none;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 24px;
+      font-size: 16px;
+      background-color: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #4f46e5;
+    }
+
+    .result {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .result h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .result p {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI 감정 분석기</h1>
+    <p>너의 기분을 자유롭게 글로 써보세요. AI가 감정을 분석해줄게!</p>
+    <textarea id="userInput" placeholder="예: 오늘 학교에서 너무 힘들었어... 선생님한테 혼났거든."></textarea>
+    <br/>
+    <button onclick="analyzeEmotion()">감정 분석하기</button>
+
+    <div class="result" id="resultBox" style="display:none;">
+      <h2>분석 결과</h2>
+      <p id="resultText"></p>
+    </div>
+  </div>
+
+  <script>
+    function analyzeEmotion() {
+      const text = document.getElementById("userInput").value.toLowerCase();
+      const resultBox = document.getElementById("resultBox");
+      const resultText = document.getElementById("resultText");
+
+      if (text.trim() === "") {
+        resultText.innerHTML = "먼저 글을 입력해주세요!";
+        resultBox.style.display = "block";
+        return;
+      }
+
+      const emotions = {
+        행복: ["좋아", "행복", "기뻐", "즐거워", "웃", "신나", "설레"],
+        슬픔: ["슬퍼", "우울", "힘들어", "지쳤", "눈물", "외로워"],
+        분노: ["화나", "짜증", "열받", "빡쳐", "미워", "짜증나"],
+        불안: ["불안", "초조", "걱정", "긴장", "불편"],
+      };
+
+      let scores = {
+        행복: 0,
+        슬픔: 0,
+        분노: 0,
+        불안: 0
+      };
+
+      for (let feeling in emotions) {
+        emotions[feeling].forEach(word => {
+          if (text.includes(word)) {
+            scores[feeling]++;
+          }
+        });
+      }
+
+      const total = Object.values(scores).reduce((a, b) => a + b, 0);
+
+      if (total === 0) {
+        resultText.innerHTML = "감정을 판단할 수 있는 단어가 없어요. 조금 더 자세히 써볼래요?";
+      } else {
+        let resultHTML = "";
+        for (let feeling in scores) {
+          const percent = ((scores[feeling] / total) * 100).toFixed(1);
+          resultHTML += `😃 ${feeling}: ${percent}%<br/>`;
+        }
+
+        // 가장 높은 감정 판단해서 한 줄 피드백 추가
+        const mainEmotion = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+        const feedbacks = {
+          행복: "오늘 기분이 좋아 보여요! 좋은 하루였군요 😊",
+          슬픔: "마음이 조금 지쳐있는 것 같아요. 잠시 쉬어가도 괜찮아요 💙",
+          분노: "많이 속상했나 봐요. 감정을 억누르지 말고 풀어보세요 🔥",
+          불안: "걱정이 많은 하루였네요. 심호흡하며 천천히 가보자구요 🌿"
+        };
+
+        resultText.innerHTML = resultHTML + "<br/><strong>" + feedbacks[mainEmotion] + "</strong>";
+      }
+
+      resultBox.style.display = "block";
+    }
+  </script>
+</body>
+</html>
